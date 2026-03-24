@@ -3,68 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kuis Matematikar</title>
+<title>Kuis Matematika</title>
 
 <style>
-body {
-  font-family: Arial;
-  background: linear-gradient(135deg,#74ebd5,#ACB6E5);
-  text-align:center;
+
+body{
+  font-family:Arial;
+  background:linear-gradient(135deg,#74ebd5,#ACB6E5);
   margin:0;
+  text-align:center;
 }
-.container {
-  max-width:800px;
-  margin:30px auto;
+
+.container{
+  max-width:900px;
+  margin:20px auto;
   background:white;
   padding:20px;
   border-radius:20px;
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
-h1{color:#333}
 
-.question{
-  font-size:20px;
-  margin:20px 0;
-  white-space:pre-line;
-}
+h1{margin:5px}
 
-.question-img{
-  margin-top:10px;
-  max-width:100%;
-  max-height:300px;
-  border-radius:10px;
-}
-
-input{
-  padding:10px;
-  font-size:18px;
-  width:150px;
-  text-align:center;
-}
-
-button{
-  margin:6px;
-  padding:10px 18px;
-  border:none;
-  border-radius:10px;
-  background:#4CAF50;
-  color:white;
-  font-size:15px;
-  cursor:pointer;
-}
-
-button:hover{background:#45a049}
-
-.feedback{
-  margin-top:15px;
-  font-size:18px;
+.timer{
+  font-size:22px;
+  font-weight:bold;
+  color:#d9534f;
 }
 
 .score-board{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
-  margin-top:15px;
+  margin-top:10px;
 }
 
 .team{
@@ -78,27 +49,60 @@ button:hover{background:#45a049}
   font-weight:bold;
 }
 
-.timer{
+.question{
   font-size:22px;
-  font-weight:bold;
-  margin-top:10px;
-  color:#d9534f;
+  margin:20px 0;
+  white-space:pre-line;
 }
 
-/* warna juara */
+.question-img{
+  margin:15px auto;
+  max-width:500px;
+  width:100%;
+  border-radius:10px;
+  display:none;
+}
+
+input{
+  padding:10px;
+  font-size:18px;
+  width:200px;
+  text-align:center;
+}
+
+button{
+  margin:5px;
+  padding:10px 20px;
+  border:none;
+  border-radius:10px;
+  background:#4CAF50;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#45a049;
+}
+
+.feedback{
+  margin-top:10px;
+  font-size:20px;
+  font-weight:bold;
+}
+
 .rank1{background:gold}
 .rank2{background:silver}
 .rank3{background:#cd7f32}
+
 </style>
 </head>
 
 <body>
 
 <div class="container">
-<h1>🎮 Kuis Matematika</h1>
-<h3></h3>
 
-<button onclick="toggleFullscreen()">🔳 Full Screen</button>
+<h1>🎮 Kuis Matematika</h1>
 
 <div class="timer" id="timer">Waktu: 02:00</div>
 
@@ -111,175 +115,266 @@ button:hover{background:#45a049}
 
 <div class="question" id="question"></div>
 
-<img id="questionImg" class="question-img" style="display:none">
+<img id="questionImg" class="question-img">
 
-<input type="text" id="answer" placeholder="Ketik jawaban..." />
+<input id="answer" placeholder="Ketik jawaban...">
 <br>
 
 <button onclick="checkAnswer()">Jawab</button>
 <button onclick="switchTeam()">Ganti Regu</button>
 
 <div class="feedback" id="feedback"></div>
+
 </div>
 
 <script>
 
-// ================= SOAL =================
-let questions = [
+// ================== SOAL ==================
+
+let questions=[
+
 {
-  q: "Suhu di kota X adalah –4°C dan di kota Y adalah 3°C. Berapa selisih suhu antara kedua kota?",
-  a: "7",
-  img: ""
+q:"Ibu kota Indonesia adalah?",
+a:"jakarta",
+img:"https://drive.google.com/thumbnail?id=18wzAigIDua_-H_HCNROaeUzu0WXMe0DK&sz=w800"
 },
+
 {
-  q: "Seorang penyelam berada di kedalaman –30 meter. Ia naik ke –10 meter. Berapa meter ia naik?",
-  a: "20",
-  img: ""
+q:"Hasil dari 2 + 3 adalah?",
+a:"5",
+img:""
 },
+
 {
-  q: "Dalam resep kue, dibutuhkan 2/3 gelas gula. Jika ingin membuat setengah resep, berapa gelas gula yang dibutuhkan?",
-  a: "1/3",
-  img: ""
+q:"3 × 4 = ?",
+a:"12",
+img:""
 },
+
 {
-  q: "Harga sebuah tas adalah Rp200.000. Jika mendapat diskon 25%, berapa harga setelah diskon?",
-  a: "175000",
-  img: ""
+q:"Jumlah sudut segitiga adalah?",
+a:"180",
+img:""
 },
+
 {
-  q: "Seorang siswa menyiram tanaman menggunakan 3/4 liter air untuk setiap tanaman. Jika ia menyiram 4 tanaman, berapa liter air yang digunakan?",
-  a: "3",
-  img: ""
+q:"Bangun datar dengan 4 sisi sama panjang adalah?",
+a:"persegi",
+img:""
 }
+
 ];
 
+
 // ================= DATA =================
-let currentQuestion = 0;
+
+let currentQuestion=0;
 let scores=[0,0,0,0];
 let wrongs=[0,0,0,0];
 let currentTeam=0;
-let timeLeft = 3600;
-let timerInterval;
+let timeLeft=3600;
+let timer;
+
 
 // ================= TIMER =================
+
 function startTimer(){
-  timerInterval = setInterval(()=>{
-    let m = Math.floor(timeLeft / 60);
-    let s = timeLeft % 60;
-    s = s < 10 ? '0' + s : s;
 
-    document.getElementById("timer").innerText = `Waktu: ${m}:${s}`;
+timer=setInterval(()=>{
 
-    if(timeLeft <= 0){
-      clearInterval(timerInterval);
-      endGame();
-    }
+let m=Math.floor(timeLeft/60);
+let s=timeLeft%60;
 
-    timeLeft--;
-  },1000);
+if(s<10)s="0"+s;
+
+document.getElementById("timer").innerText=`Waktu: ${m}:${s}`;
+
+if(timeLeft<=0){
+
+clearInterval(timer);
+endGame();
+
 }
 
-// ================= AKHIR GAME =================
-function endGame(){
-  let finalScores = scores.map((b,i)=> b - wrongs[i]);
+timeLeft--;
 
-  let ranking = finalScores
-    .map((s,i)=>({team:i+1, skor:s, benar:scores[i], salah:wrongs[i]}))
-    .sort((a,b)=>b.skor-a.skor);
+},1000);
 
-  let hasil = "⏰ Waktu Habis!\n\n";
-
-  ranking.forEach((r,i)=>{
-    hasil += `#${i+1} Regu ${r.team} → Benar: ${r.benar} | Salah: ${r.salah} | Skor: ${r.skor}\n`;
-  });
-
-  hasil += `\n🏆 Juara: Regu ${ranking[0].team}`;
-
-  document.getElementById("question").innerText = hasil;
 }
 
-// ================= SOAL =================
+
+// ================= TAMPIL SOAL =================
+
 function showQuestion(){
 
-  if(currentQuestion < questions.length){
+if(currentQuestion>=questions.length){
 
-    document.getElementById("question").innerText = questions[currentQuestion].q;
+endGame();
+return;
 
-    let img = document.getElementById("questionImg");
-
-    if(questions[currentQuestion].img){
-      img.src = questions[currentQuestion].img;
-      img.style.display = "block";
-    } else {
-      img.style.display = "none";
-    }
-
-  } else {
-
-    document.getElementById("question").innerText = "Soal habis, tunggu waktu selesai";
-    document.getElementById("questionImg").style.display="none";
-
-  }
-
-  document.getElementById("answer").value="";
-  document.getElementById("feedback").innerText="";
 }
+
+let q=questions[currentQuestion];
+
+document.getElementById("question").innerText=q.q;
+
+let imgElement=document.getElementById("questionImg");
+
+if(q.img && q.img!==""){
+
+imgElement.src=q.img;
+imgElement.style.display="block";
+
+}else{
+
+imgElement.style.display="none";
+
+}
+
+document.getElementById("answer").value="";
+document.getElementById("feedback").innerText="";
+
+}
+
 
 // ================= CEK JAWABAN =================
+
 function checkAnswer(){
-  let user = document.getElementById("answer").value.trim().toLowerCase();
-  let correct = String(questions[currentQuestion].a).trim().toLowerCase();
 
-  if(currentQuestion >= questions.length) return;
+let user=document.getElementById("answer").value.trim().toLowerCase();
+let correct=questions[currentQuestion].a.toLowerCase();
 
-  if(user === correct){
+if(user===correct){
 
-    scores[currentTeam]++;
-    document.getElementById("feedback").innerText="✅ Benar!";
-    updateScore();
+scores[currentTeam]++;
 
-    setTimeout(()=>{
-      currentQuestion++;
-      showQuestion();
-    }, 500);
+document.getElementById("feedback").innerText="✅ Benar!";
 
-  } else {
+updateScore();
 
-    wrongs[currentTeam]++;
-    document.getElementById("feedback").innerText="❌ Salah! Coba lagi";
-    updateScore();
+setTimeout(()=>{
 
-  }
+currentQuestion++;
 
-  document.getElementById("answer").value="";
+showQuestion();
+
+},500);
+
+}else{
+
+wrongs[currentTeam]++;
+
+document.getElementById("feedback").innerText="❌ Salah!";
+
+updateScore();
+
 }
+
+document.getElementById("answer").value="";
+
+}
+
 
 // ================= UPDATE SKOR =================
+
 function updateScore(){
-  for(let i=0;i<4;i++){
-    let skor = scores[i] - wrongs[i];
-    document.getElementById("team"+(i+1)).innerText =
-      `Regu ${i+1} | Benar: ${scores[i]} | Salah: ${wrongs[i]} | Skor: ${skor}`;
-  }
+
+for(let i=0;i<4;i++){
+
+let skor=scores[i]-wrongs[i];
+
+document.getElementById("team"+(i+1)).innerText=
+`Regu ${i+1} | Benar: ${scores[i]} | Salah: ${wrongs[i]} | Skor: ${skor}`;
+
 }
+
+}
+
 
 // ================= GANTI REGU =================
+
 function switchTeam(){
-  document.getElementById("team"+(currentTeam+1)).classList.remove("active");
-  currentTeam=(currentTeam+1)%4;
-  document.getElementById("team"+(currentTeam+1)).classList.add("active");
+
+document.getElementById("team"+(currentTeam+1)).classList.remove("active");
+
+currentTeam=(currentTeam+1)%4;
+
+document.getElementById("team"+(currentTeam+1)).classList.add("active");
+
 }
 
-// ================= FULLSCREEN =================
-function toggleFullscreen(){
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen();
-  } else {
-    document.exitFullscreen();
-  }
+
+// ================= AKHIR GAME =================
+
+function endGame(){
+
+clearInterval(timer);
+
+let finalScores=scores.map((b,i)=>b-wrongs[i]);
+
+let ranking=finalScores
+.map((s,i)=>({team:i+1,skor:s}))
+.sort((a,b)=>b.skor-a.skor);
+
+let text="🏁 Kuis Selesai!\n\n";
+
+ranking.forEach((r,i)=>{
+
+text+=`#${i+1} Regu ${r.team} → Skor: ${r.skor}\n`;
+
+});
+
+text+=`\n🏆 Juara: Regu ${ranking[0].team}`;
+
+document.getElementById("question").innerText=text;
+document.getElementById("questionImg").style.display="none";
+
+ranking.forEach((r,i)=>{
+
+let el=document.getElementById("team"+r.team);
+
+if(i===0)el.classList.add("rank1");
+if(i===1)el.classList.add("rank2");
+if(i===2)el.classList.add("rank3");
+
+});
+
 }
+
+
+// ================= ENTER UNTUK JAWAB =================
+
+document.getElementById("answer")
+.addEventListener("keypress",function(e){
+
+if(e.key==="Enter")checkAnswer();
+
+});
+
+
+// ================= FULLSCREEN (TEKAN F) =================
+
+document.addEventListener("keydown",function(e){
+
+if(e.key==="f"){
+
+if(!document.fullscreenElement){
+
+document.documentElement.requestFullscreen();
+
+}else{
+
+document.exitFullscreen();
+
+}
+
+}
+
+});
+
 
 // ================= START =================
+
 updateScore();
 showQuestion();
 startTimer();
