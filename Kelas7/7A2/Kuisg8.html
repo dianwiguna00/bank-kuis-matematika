@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Matematika</title>
+
+<style>
+body{
+  font-family: Arial;
+  background: linear-gradient(135deg,#74ebd5,#ACB6E5);
+  margin:0;
+  text-align:center;
+}
+
+.container{
+  max-width:900px;
+  margin:20px auto;
+  background:white;
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.timer{
+  font-size:22px;
+  font-weight:bold;
+  color:#d9534f;
+}
+
+/* SOAL + GAMBAR */
+.question-wrapper{
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+  margin:20px 0;
+}
+
+.question{
+  flex:1;
+  font-size:22px;
+  white-space:pre-line;
+  text-align:left;
+  line-height:1.6;
+}
+
+.question-img{
+  max-width:280px;
+  border-radius:10px;
+  margin-left:auto;
+  display:none;
+}
+
+/* SCORE */
+.score-board{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:10px;
+}
+
+.team{
+  padding:10px;
+  border-radius:10px;
+  background:#f0f0f0;
+}
+
+.active{
+  background:#c8f7c5;
+  font-weight:bold;
+}
+
+.rank1{background:gold}
+.rank2{background:silver}
+.rank3{background:#cd7f32}
+
+input{
+  padding:10px;
+  font-size:18px;
+  width:220px;
+}
+
+button{
+  margin:5px;
+  padding:10px 20px;
+  border:none;
+  border-radius:10px;
+  background:#4CAF50;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+
+button:hover{ background:#45a049; }
+
+.feedback{
+  margin-top:10px;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.locked{ background:#eee; }
+
+/* PEMBAHASAN */
+.pembahasan-btn{
+  background:#2196F3;
+}
+
+.pembahasan-panel{
+  position:relative;
+  margin-top:10px;
+  padding:15px;
+  background:#f9fbff;
+  border-left:5px solid #2196F3;
+  border-radius:10px;
+  text-align:left;
+  font-size:16px;
+  display:none;
+}
+
+.pembahasan-panel h4{
+  margin-top:0;
+  color:#2196F3;
+}
+
+.close-btn{
+  float:right;
+  cursor:pointer;
+  color:#d9534f;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>🎮 Kuis Matematika</h1>
+<h3>Mengidentifikasi Jenis-Jenis Sudut: Lancip, Siku-Siku, Tumpul, dan Refleks</h3>
+<div class="timer" id="timer">Waktu: 60:00</div>
+
+<div class="score-board">
+  <div id="team1" class="team active"></div>
+  <div id="team2" class="team"></div>
+  <div id="team3" class="team"></div>
+  <div id="team4" class="team"></div>
+</div>
+
+<div id="questionNumber" style="font-weight:bold;margin-top:10px;"></div>
+
+<div class="question-wrapper">
+  <div class="question" id="question"></div>
+  <img id="questionImg" class="question-img">
+</div>
+
+<div id="pembahasan" class="pembahasan-panel">
+<span class="close-btn" onclick="closePembahasan()">✖</span>
+<h4>Pembahasan</h4>
+<div id="pembahasanText"></div>
+</div>
+
+<input id="answer" placeholder="Ketik jawaban...">
+<br>
+
+<button onclick="checkAnswer()">Jawab</button>
+<button onclick="nextQuestion()">Soal Selanjutnya</button>
+<button onclick="switchTeam()">Ganti Regu</button>
+<button class="pembahasan-btn" onclick="showPembahasan()">📘 Pembahasan</button>
+
+<div class="feedback" id="feedback"></div>
+
+</div>
+
+<script>
+
+/* ELEMENT */
+const question=document.getElementById("question");
+const questionImg=document.getElementById("questionImg");
+const questionNumber=document.getElementById("questionNumber");
+const answer=document.getElementById("answer");
+const feedback=document.getElementById("feedback");
+const pembahasan=document.getElementById("pembahasan");
+const pembahasanText=document.getElementById("pembahasanText");
+
+/* SOAL */
+let questions=[
+{
+  q: "Sudut yang besarnya 45° termasuk jenis sudut...\nA. Sudut Lancip\nB. Sudut Siku-Siku\nC. Sudut Tumpul\nD. Sudut Refleks",
+  a: "Sudut Lancip",
+  p: "Sudut lancip adalah sudut yang besarnya kurang dari 90°. Karena 45° < 90°, maka sudut tersebut termasuk sudut lancip.",
+  img: ""
+},
+
+{
+  q: "Sudut antara lantai dan dinding rumah biasanya membentuk sudut...\nA. Sudut Lancip\nB. Sudut Siku-Siku\nC. Sudut Tumpul\nD. Sudut Refleks",
+  a: "Sudut Siku-Siku",
+  p: "Sudut siku-siku adalah sudut yang besarnya tepat 90°. Lantai dan dinding rumah saling tegak lurus sehingga membentuk sudut 90°.",
+  img: ""
+},
+
+{
+  q: "Sudut yang besarnya 135° termasuk jenis sudut...\nA. Sudut Lancip\nB. Sudut Siku-Siku\nC. Sudut Tumpul\nD. Sudut Refleks",
+  a: "Sudut Tumpul",
+  p: "Sudut tumpul adalah sudut yang besarnya lebih dari 90° tetapi kurang dari 180°. Karena 135° berada di antara 90° dan 180°, maka termasuk sudut tumpul.",
+  img: ""
+},
+
+{
+  q: "Sudut yang dibentuk oleh kipas terbuka lebar sebesar 270° termasuk jenis sudut...\nA. Sudut Lancip\nB. Sudut Siku-Siku\nC. Sudut Tumpul\nD. Sudut Refleks",
+  a: "Sudut Refleks",
+  p: "Sudut refleks adalah sudut yang besarnya lebih dari 180° dan kurang dari 360°. Karena 270° > 180°, maka sudut tersebut termasuk sudut refleks.",
+  img: ""
+},
+
+{
+  q: "Sudut yang dibentuk oleh jarum jam pada pukul 2:00 termasuk jenis sudut...\nA. Sudut Lancip\nB. Sudut Siku-Siku\nC. Sudut Tumpul\nD. Sudut Refleks",
+  a: "Sudut Lancip",
+  p: "Pada pukul 2:00, jarum pendek berada di angka 2 dan jarum panjang di angka 12. Sudut yang terbentuk adalah 60°, yang kurang dari 90°, sehingga termasuk sudut lancip.",
+  img: ""
+}
+];
+
+/* DATA */
+let currentQuestion=0;
+let scores=[0,0,0,0];
+let wrongs=[0,0,0,0];
+let currentTeam=0;
+let answered=new Array(questions.length).fill(false);
+
+/* TIMER */
+let timeLeft=3600;
+let timerInterval;
+const timerEl=document.getElementById("timer");
+
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    if(timeLeft<=0){
+      endQuiz();
+      return;
+    }
+    let m=Math.floor(timeLeft/60);
+    let s=timeLeft%60;
+    if(s<10)s="0"+s;
+    timerEl.textContent=`Waktu: ${m}:${s}`;
+    timeLeft--;
+  },1000);
+}
+
+/* TAMPIL SOAL */
+function showQuestion(){
+
+pembahasan.style.display="none";
+
+if(answered.every(v=>v)){
+endQuiz();
+return;
+}
+
+let q=questions[currentQuestion];
+
+question.textContent=q.q;
+questionNumber.textContent=`Soal ${currentQuestion+1} dari ${questions.length}`;
+
+if(q.img){
+questionImg.src=q.img;
+questionImg.style.display="block";
+}else{
+questionImg.style.display="none";
+}
+
+if(answered[currentQuestion]){
+answer.value="Soal sudah benar";
+answer.disabled=true;
+answer.classList.add("locked");
+}else{
+answer.value="";
+answer.disabled=false;
+answer.classList.remove("locked");
+feedback.textContent="";
+}
+
+}
+
+/* NAVIGASI */
+function nextQuestion(){
+currentQuestion=(currentQuestion+1)%questions.length;
+showQuestion();
+}
+
+/* CEK JAWABAN */
+function checkAnswer(){
+
+if(answer.disabled)return;
+
+let user=answer.value.trim().toLowerCase();
+let correct=questions[currentQuestion].a.trim().toLowerCase();
+
+if(user===correct){
+
+scores[currentTeam]++;
+answered[currentQuestion]=true;
+
+feedback.textContent="✅ Benar";
+
+updateScore();
+
+setTimeout(()=>{
+currentQuestion=(currentQuestion+1)%questions.length;
+showQuestion();
+},500);
+
+}else{
+
+wrongs[currentTeam]++;
+feedback.textContent="❌ Salah";
+
+updateScore();
+
+}
+
+}
+
+/* SKOR */
+function updateScore(){
+for(let i=0;i<4;i++){
+
+let skor=scores[i]-wrongs[i];
+
+document.getElementById("team"+(i+1)).textContent=
+`Regu ${i+1} | Benar: ${scores[i]} | Salah: ${wrongs[i]} | Skor: ${skor}`;
+
+}
+}
+
+/* REGU */
+function switchTeam(){
+
+document.getElementById("team"+(currentTeam+1)).classList.remove("active");
+
+currentTeam=(currentTeam+1)%4;
+
+document.getElementById("team"+(currentTeam+1)).classList.add("active");
+
+}
+
+/* PEMBAHASAN */
+function showPembahasan(){
+
+let p=questions[currentQuestion].p;
+
+if(!p){
+pembahasanText.textContent="Pembahasan belum tersedia";
+}else{
+pembahasanText.textContent=p;
+}
+
+pembahasan.style.display="block";
+
+}
+
+function closePembahasan(){
+pembahasan.style.display="none";
+}
+
+/* AKHIR */
+function endQuiz(){
+  clearInterval(timerInterval);
+
+  let finalScores=scores.map((b,i)=>b-wrongs[i]);
+  let ranking=finalScores
+    .map((s,i)=>({team:i+1,skor:s}))
+    .sort((a,b)=>b.skor-a.skor);
+
+  let text="🏁 KUIS SELESAI\n\n";
+  ranking.forEach((r,i)=>{
+    text+=`Juara ${i+1}: Regu ${r.team} → Skor ${r.skor}\n`;
+  });
+
+  question.textContent=text;
+  questionImg.style.display="none";
+  questionNumber.textContent="";
+  answer.disabled=true;
+  feedback.textContent="";
+
+  ranking.forEach((r,i)=>{
+    let el=document.getElementById("team"+r.team);
+    if(i===0) el.classList.add("rank1");
+    if(i===1) el.classList.add("rank2");
+    if(i===2) el.classList.add("rank3");
+  });
+}
+
+/* START */
+updateScore();
+showQuestion();
+startTimer();
+
+</script>
+
+<h3>Dian Wiguna</h3>
+
+</body>
+</html>
