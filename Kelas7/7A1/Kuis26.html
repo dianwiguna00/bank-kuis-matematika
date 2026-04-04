@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Matematika</title>
+
+<style>
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#74ebd5,#ACB6E5);
+margin:0;
+text-align:center;
+}
+
+.container{
+max-width:950px;
+margin:20px auto;
+background:white;
+padding:20px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.timer{
+font-size:24px;
+font-weight:bold;
+color:#d9534f;
+margin-bottom:10px;
+}
+
+.score-board{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:15px;
+}
+
+.team{
+padding:12px;
+background:#f0f0f0;
+border-radius:10px;
+font-size:18px;
+}
+
+.active{
+background:#c8f7c5;
+font-weight:bold;
+}
+
+.question{
+  font-size:24px;
+  text-align:left;
+  margin:10px 0;
+  white-space: pre-line;
+}
+
+.options{
+margin-top:20px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+.optionBtn{
+padding:15px;
+font-size:20px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.btnA{background:#1E88E5;}
+.btnB{background:#43A047;}
+.btnC{background:#FB8C00;}
+.btnD{background:#8E24AA;}
+
+.correct{background:#2ecc71!important;}
+.wrong{background:#e74c3c!important;}
+
+button{
+margin:5px;
+padding:10px 20px;
+border:none;
+border-radius:10px;
+background:#4CAF50;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+.feedback{
+font-size:22px;
+font-weight:bold;
+margin-top:10px;
+}
+
+.pembahasan{
+display:none;
+margin-top:15px;
+padding:15px;
+background:#f9fbff;
+border-left:5px solid #2196F3;
+text-align:left;
+border-radius:10px;
+}
+.close{
+float:right;
+cursor:pointer;
+color:red;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🎮 Kuis Matematika</h1>
+<h3>Mengintegrasikan konsep diskon, pajak, untung, rugi, dan bunga tunggal dalam kehidupan sehari-hari.</h3>
+
+<div class="timer" id="timer">Waktu: 60:00</div>
+
+<div class="score-board">
+<div id="team1" class="team active"></div>
+<div id="team2" class="team"></div>
+<div id="team3" class="team"></div>
+<div id="team4" class="team"></div>
+</div>
+
+<div id="questionNumber"></div>
+<div class="question" id="question"></div>
+<div class="options" id="options"></div>
+
+<button onclick="nextQuestion()">Soal Berikut</button>
+<button onclick="switchTeam()">Ganti Regu</button>
+<button onclick="showPembahasan()">📘 Pembahasan</button>
+
+<div id="feedback" class="feedback"></div>
+
+<div id="pembahasan" class="pembahasan">
+<span class="close" onclick="closePembahasan()">✖</span>
+<b>Pembahasan</b>
+<div id="pembahasanText"></div>
+</div>
+</div>
+
+<script>
+let questions=[
+{
+q:"Sebuah toko menjual televisi seharga Rp4.000.000. Toko memberikan diskon 10% dan mengenakan PPN 11% dari harga setelah diskon. Berapa harga akhir yang harus dibayar pembeli?\n",
+options:["Rp3.960.000","Rp3.996.000","Rp4.400.000","Rp4.140.000"],
+correct:"Rp3.996.000",
+p:"Diskon 10% dari Rp4.000.000 adalah Rp400.000 sehingga harga setelah diskon Rp3.600.000. PPN 11% dari Rp3.600.000 adalah Rp396.000. Harga akhir yang harus dibayar = Rp3.600.000 + Rp396.000 = Rp3.996.000.",
+img:""
+},
+{
+q:"Seorang pedagang membeli 10 blender seharga Rp250.000 per buah. Ia memberikan diskon 20% kepada pembeli dan tetap mendapat untung Rp20.000 per buah setelah diskon. Berapa harga jual sebelum diskon?\n",
+options:["Rp300.000","Rp270.000","Rp280.000","Rp337.500"],
+correct:"Rp337.500",
+p:"Harga beli per buah Rp250.000 dan untung Rp20.000, sehingga harga jual setelah diskon Rp270.000. Karena diskon 20%, maka harga setelah diskon = 80% dari harga awal. Harga jual sebelum diskon = Rp270.000 ÷ 0,8 = Rp337.500.",
+img:""
+},
+{
+q:"Kamu menabung Rp2.000.000 di bank dengan bunga tunggal 5% per tahun. Setelah 2 tahun, kamu ingin membeli handphone seharga Rp2.100.000 yang dikenai PPN 10%. Apakah tabunganmu cukup?\n",
+options:["Cukup, sisa Rp100.000","Tidak cukup, kurang Rp110.000","Cukup pas","Tidak cukup, kurang Rp10.000"],
+correct:"Tidak cukup, kurang Rp110.000",
+p:"Bunga tunggal = (5 × 2.000.000 × 2) / 100 = Rp200.000 sehingga total tabungan Rp2.200.000. Harga HP setelah PPN 10% = Rp2.100.000 + Rp210.000 = Rp2.310.000. Kekurangan dana = Rp2.310.000 − Rp2.200.000 = Rp110.000.",
+img:""
+},
+{
+q:"Sebuah toko menjual kulkas seharga Rp3.500.000. Toko memberikan diskon 15% dan mengenakan PPN 10%. Berapa harga akhir yang harus dibayar?\n",
+options:["Rp3.332.500","Rp3.500.000","Rp3.267.500","Rp3.400.000"],
+correct:"Rp3.272.500",
+p:"Diskon 15% dari Rp3.500.000 adalah Rp525.000 sehingga harga setelah diskon Rp2.975.000. PPN 10% dari Rp2.975.000 adalah Rp297.500. Harga akhir = Rp2.975.000 + Rp297.500 = Rp3.272.500. Kunci sebelumnya tidak sesuai dan telah diperbaiki.",
+img:""
+},
+{
+q:"Sebuah investasi sebesar Rp5.000.000 menghasilkan bunga tunggal 10% per tahun. Berapa nilai akhir investasi setelah 1,5 tahun?\n",
+options:["Rp5.750.000","Rp5.500.000","Rp5.250.000","Rp5.000.000"],
+correct:"Rp5.750.000",
+p:"Bunga tunggal = (10 × 5.000.000 × 1,5) / 100 = Rp750.000. Nilai akhir investasi = Rp5.000.000 + Rp750.000 = Rp5.750.000. Jawaban pada soal sebelumnya keliru dan diperbaiki sesuai perhitungan.",
+img:""
+}
+
+];
+
+let currentQuestion=0;
+let scores=[0,0,0,0];
+let wrongs=[0,0,0,0];
+let currentTeam=0;
+let answered=new Array(questions.length).fill(false);
+let quizFinished=false;
+
+function shuffle(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}}
+
+function showQuestion(){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+let opsi=[...q.options];
+shuffle(opsi);
+
+q.correctIndex=opsi.indexOf(q.correct);
+q.correctLetter=String.fromCharCode(65+q.correctIndex);
+
+document.getElementById("question").textContent=q.q;
+document.getElementById("questionNumber").textContent=
+`Soal ${currentQuestion+1} dari ${questions.length}`;
+
+let html="";
+opsi.forEach((o,i)=>{
+let letter=String.fromCharCode(65+i);
+let btnClass=["btnA","btnB","btnC","btnD"][i];
+html+=`<button class="optionBtn ${btnClass}"
+onclick="checkAnswer('${letter}','${o}',this)">
+${letter}. ${o}</button>`;
+});
+document.getElementById("options").innerHTML=html;
+document.getElementById("feedback").textContent="";
+closePembahasan();
+}
+
+function checkAnswer(letter,text,btn){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+document.querySelectorAll(".optionBtn").forEach(b=>b.disabled=true);
+
+if(text===q.correct){
+btn.classList.add("correct");
+scores[currentTeam]++;
+answered[currentQuestion]=true;
+document.getElementById("feedback").textContent="✅ Benar";
+}else{
+btn.classList.add("wrong");
+wrongs[currentTeam]++;
+document.getElementById("feedback").textContent="❌ Salah";
+}
+
+updateScore();
+
+setTimeout(()=>{
+if(answered.every(v=>v)){
+endQuiz();
+}else nextQuestion();
+},800);
+}
+
+function nextQuestion(){
+let start=currentQuestion;
+do{
+currentQuestion=(currentQuestion+1)%questions.length;
+}while(answered[currentQuestion] && currentQuestion!==start);
+showQuestion();
+}
+
+function endQuiz(){
+quizFinished=true;
+clearInterval(timer);
+document.getElementById("question").innerHTML="🏁 <b>KUIS SELESAI</b>";
+document.getElementById("options").innerHTML="";
+document.getElementById("feedback").innerHTML=showWinners();
+}
+
+function showWinners(){
+let rank=[0,1,2,3].map(i=>({
+team:i+1,
+score:scores[i]-wrongs[i]
+}));
+rank.sort((a,b)=>b.score-a.score);
+
+let html="<h2>🏆 Pengumuman Juara</h2>";
+rank.forEach((r,i)=>{
+html+=`<p>Juara ${i+1}: <b>Regu ${r.team}</b> (Skor ${r.score})</p>`;
+});
+return html;
+}
+
+function updateScore(){
+for(let i=0;i<4;i++){
+document.getElementById("team"+(i+1)).textContent=
+`Regu ${i+1} | Benar: ${scores[i]} | Salah: ${wrongs[i]} | Skor: ${scores[i]-wrongs[i]}`;
+}}
+
+function switchTeam(){
+document.getElementById("team"+(currentTeam+1)).classList.remove("active");
+currentTeam=(currentTeam+1)%4;
+document.getElementById("team"+(currentTeam+1)).classList.add("active");
+}
+
+function showPembahasan(){
+document.getElementById("pembahasanText").textContent=
+questions[currentQuestion].p;
+document.getElementById("pembahasan").style.display="block";
+}
+
+function closePembahasan(){
+document.getElementById("pembahasan").style.display="none";
+}
+
+let timeLeft=3600;
+let timer=setInterval(()=>{
+let m=Math.floor(timeLeft/60);
+let s=timeLeft%60;
+if(s<10)s="0"+s;
+document.getElementById("timer").textContent=`Waktu: ${m}:${s}`;
+timeLeft--;
+if(timeLeft<0){
+document.getElementById("timer").textContent="⏰ Waktu Habis";
+endQuiz();
+}},1000);
+
+shuffle(questions);
+updateScore();
+showQuestion();
+</script>
+
+<h3>Dian Wiguna</h3>
+</body>
+</html>

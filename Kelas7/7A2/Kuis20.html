@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Matematika</title>
+
+<style>
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#74ebd5,#ACB6E5);
+margin:0;
+text-align:center;
+}
+
+.container{
+max-width:950px;
+margin:20px auto;
+background:white;
+padding:20px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.timer{
+font-size:24px;
+font-weight:bold;
+color:#d9534f;
+margin-bottom:10px;
+}
+
+.score-board{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:15px;
+}
+
+.team{
+padding:12px;
+background:#f0f0f0;
+border-radius:10px;
+font-size:18px;
+}
+
+.active{
+background:#c8f7c5;
+font-weight:bold;
+}
+
+.question{
+  font-size:24px;
+  text-align:left;
+  margin:10px 0;
+  white-space: pre-line;
+}
+
+.options{
+margin-top:20px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+.optionBtn{
+padding:15px;
+font-size:20px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.btnA{background:#1E88E5;}
+.btnB{background:#43A047;}
+.btnC{background:#FB8C00;}
+.btnD{background:#8E24AA;}
+
+.correct{background:#2ecc71!important;}
+.wrong{background:#e74c3c!important;}
+
+button{
+margin:5px;
+padding:10px 20px;
+border:none;
+border-radius:10px;
+background:#4CAF50;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+.feedback{
+font-size:22px;
+font-weight:bold;
+margin-top:10px;
+}
+
+.pembahasan{
+display:none;
+margin-top:15px;
+padding:15px;
+background:#f9fbff;
+border-left:5px solid #2196F3;
+text-align:left;
+border-radius:10px;
+}
+.close{
+float:right;
+cursor:pointer;
+color:red;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🎮 Kuis Matematika</h1>
+<h3>Mengumpulkan dan Menyajikan Data Bangun Datar</h3>
+
+<div class="timer" id="timer">Waktu: 60:00</div>
+
+<div class="score-board">
+<div id="team1" class="team active"></div>
+<div id="team2" class="team"></div>
+<div id="team3" class="team"></div>
+<div id="team4" class="team"></div>
+</div>
+
+<div id="questionNumber"></div>
+<div class="question" id="question"></div>
+<div class="options" id="options"></div>
+
+<button onclick="nextQuestion()">Soal Berikut</button>
+<button onclick="switchTeam()">Ganti Regu</button>
+<button onclick="showPembahasan()">📘 Pembahasan</button>
+
+<div id="feedback" class="feedback"></div>
+
+<div id="pembahasan" class="pembahasan">
+<span class="close" onclick="closePembahasan()">✖</span>
+<b>Pembahasan</b>
+<div id="pembahasanText"></div>
+</div>
+</div>
+
+<script>
+let questions=[
+{
+q:" (cm²)\nLantai (Persegi Panjang) | 120\nKarpet (Lingkaran) | 78.5\nPoster (Segitiga) | 45\n\nBerdasarkan data tersebut, urutan bangun dari yang paling kecil ke paling besar luasnya adalah...",
+options:["Poster, Karpet, Lantai","Karpet, Poster, Lantai","Poster, Lantai, Karpet","Karpet, Lantai, Poster"],
+correct:"Poster, Karpet, Lantai",
+p:"Urutan luas bangun datar dari tabel adalah Poster = 45 cm², Karpet = 78,5 cm², dan Lantai = 120 cm². Dari yang terkecil ke terbesar adalah Poster, Karpet, kemudian Lantai.",
+img:""
+},
+
+{
+q:"Dalam grafik batang yang menunjukkan luas bangun datar, batang untuk segitiga lebih pendek daripada batang untuk lingkaran. Hal ini menunjukkan bahwa...",
+options:["Segitiga lebih luas dari lingkaran","Lingkaran lebih luas dari segitiga","Kedua bangun memiliki luas sama","Grafik tidak menunjukkan luas"],
+correct:"Lingkaran lebih luas dari segitiga",
+p:"Pada grafik batang, batang yang lebih tinggi menunjukkan nilai yang lebih besar. Karena batang segitiga lebih pendek daripada batang lingkaran, maka luas lingkaran lebih besar daripada luas segitiga.",
+img:""
+},
+
+{
+q:"Tujuan utama menyajikan data luas bangun datar dalam bentuk tabel dan grafik adalah...",
+options:["Agar data terlihat lebih berwarna","Untuk memperindah tampilan","Memudahkan analisis dan perbandingan","Menyulitkan pembaca memahami data"],
+correct:"Memudahkan analisis dan perbandingan",
+p:"Penyajian data dalam bentuk tabel dan grafik bertujuan untuk mempermudah pembaca memahami, membandingkan, dan menganalisis data secara visual dan sistematis.",
+img:""
+},
+
+{
+q:"Seorang siswa mengukur luas beberapa benda di rumahnya yang berbentuk bangun datar. Ia mencatat data berikut:\nBangun Datar | Luas (cm²)\nMeja (Persegi Panjang) | 96\nBuku (Segitiga) | 30\nPiring (Lingkaran) | 78.5\n\nBerdasarkan data tersebut, bangun datar yang memiliki luas terbesar adalah...",
+options:["Meja","Buku","Piring","Semua sama luas"],
+correct:"Meja",
+p:"Dari tabel terlihat bahwa luas meja adalah 96 cm², luas buku 30 cm², dan luas piring 78,5 cm². Nilai terbesar adalah 96 cm² sehingga bangun datar dengan luas terbesar adalah meja.",
+img:""
+},
+
+{
+q:"Berikut adalah data luas beberapa bangun datar:\nBangun Datar | Luas (cm²)\nPersegi | 49\nJajar Genjang | 60\nBelah Ketupat | 48\n\nJika data tersebut disajikan dalam grafik batang, maka tinggi batang tertinggi mewakili bangun...",
+options:["Persegi","Jajar Genjang","Belah Ketupat","Semua sama tinggi"],
+correct:"Jajar Genjang",
+p:"Tinggi batang pada grafik batang menunjukkan besar nilai data. Dari tabel terlihat bahwa luas terbesar adalah 60 cm² milik jajar genjang, sehingga batang tertinggi mewakili jajar genjang.",
+img:""
+}
+
+];
+
+let currentQuestion=0;
+let scores=[0,0,0,0];
+let wrongs=[0,0,0,0];
+let currentTeam=0;
+let answered=new Array(questions.length).fill(false);
+let quizFinished=false;
+
+function shuffle(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}}
+
+function showQuestion(){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+let opsi=[...q.options];
+shuffle(opsi);
+
+q.correctIndex=opsi.indexOf(q.correct);
+q.correctLetter=String.fromCharCode(65+q.correctIndex);
+
+document.getElementById("question").textContent=q.q;
+document.getElementById("questionNumber").textContent=
+`Soal ${currentQuestion+1} dari ${questions.length}`;
+
+let html="";
+opsi.forEach((o,i)=>{
+let letter=String.fromCharCode(65+i);
+let btnClass=["btnA","btnB","btnC","btnD"][i];
+html+=`<button class="optionBtn ${btnClass}"
+onclick="checkAnswer('${letter}','${o}',this)">
+${letter}. ${o}</button>`;
+});
+document.getElementById("options").innerHTML=html;
+document.getElementById("feedback").textContent="";
+closePembahasan();
+}
+
+function checkAnswer(letter,text,btn){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+document.querySelectorAll(".optionBtn").forEach(b=>b.disabled=true);
+
+if(text===q.correct){
+btn.classList.add("correct");
+scores[currentTeam]++;
+answered[currentQuestion]=true;
+document.getElementById("feedback").textContent="✅ Benar";
+}else{
+btn.classList.add("wrong");
+wrongs[currentTeam]++;
+document.getElementById("feedback").textContent="❌ Salah";
+}
+
+updateScore();
+
+setTimeout(()=>{
+if(answered.every(v=>v)){
+endQuiz();
+}else nextQuestion();
+},800);
+}
+
+function nextQuestion(){
+let start=currentQuestion;
+do{
+currentQuestion=(currentQuestion+1)%questions.length;
+}while(answered[currentQuestion] && currentQuestion!==start);
+showQuestion();
+}
+
+function endQuiz(){
+quizFinished=true;
+clearInterval(timer);
+document.getElementById("question").innerHTML="🏁 <b>KUIS SELESAI</b>";
+document.getElementById("options").innerHTML="";
+document.getElementById("feedback").innerHTML=showWinners();
+}
+
+function showWinners(){
+let rank=[0,1,2,3].map(i=>({
+team:i+1,
+score:scores[i]-wrongs[i]
+}));
+rank.sort((a,b)=>b.score-a.score);
+
+let html="<h2>🏆 Pengumuman Juara</h2>";
+rank.forEach((r,i)=>{
+html+=`<p>Juara ${i+1}: <b>Regu ${r.team}</b> (Skor ${r.score})</p>`;
+});
+return html;
+}
+
+function updateScore(){
+for(let i=0;i<4;i++){
+document.getElementById("team"+(i+1)).textContent=
+`Regu ${i+1} | Benar: ${scores[i]} | Salah: ${wrongs[i]} | Skor: ${scores[i]-wrongs[i]}`;
+}}
+
+function switchTeam(){
+document.getElementById("team"+(currentTeam+1)).classList.remove("active");
+currentTeam=(currentTeam+1)%4;
+document.getElementById("team"+(currentTeam+1)).classList.add("active");
+}
+
+function showPembahasan(){
+document.getElementById("pembahasanText").textContent=
+questions[currentQuestion].p;
+document.getElementById("pembahasan").style.display="block";
+}
+
+function closePembahasan(){
+document.getElementById("pembahasan").style.display="none";
+}
+
+let timeLeft=3600;
+let timer=setInterval(()=>{
+let m=Math.floor(timeLeft/60);
+let s=timeLeft%60;
+if(s<10)s="0"+s;
+document.getElementById("timer").textContent=`Waktu: ${m}:${s}`;
+timeLeft--;
+if(timeLeft<0){
+document.getElementById("timer").textContent="⏰ Waktu Habis";
+endQuiz();
+}},1000);
+
+shuffle(questions);
+updateScore();
+showQuestion();
+</script>
+
+<h3>Dian Wiguna</h3>
+</body>
+</html>

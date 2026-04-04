@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Matematika</title>
+
+<style>
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#74ebd5,#ACB6E5);
+margin:0;
+text-align:center;
+}
+
+.container{
+max-width:950px;
+margin:20px auto;
+background:white;
+padding:20px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.timer{
+font-size:24px;
+font-weight:bold;
+color:#d9534f;
+margin-bottom:10px;
+}
+
+.score-board{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:15px;
+}
+
+.team{
+padding:12px;
+background:#f0f0f0;
+border-radius:10px;
+font-size:18px;
+}
+
+.active{
+background:#c8f7c5;
+font-weight:bold;
+}
+
+.question{
+  font-size:24px;
+  text-align:left;
+  margin:10px 0;
+  white-space: pre-line;
+}
+
+.options{
+margin-top:20px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+.optionBtn{
+padding:15px;
+font-size:20px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+color:white;
+font-weight:bold;
+}
+
+.btnA{background:#1E88E5;}
+.btnB{background:#43A047;}
+.btnC{background:#FB8C00;}
+.btnD{background:#8E24AA;}
+
+.correct{background:#2ecc71!important;}
+.wrong{background:#e74c3c!important;}
+
+button{
+margin:5px;
+padding:10px 20px;
+border:none;
+border-radius:10px;
+background:#4CAF50;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
+.feedback{
+font-size:22px;
+font-weight:bold;
+margin-top:10px;
+}
+
+.pembahasan{
+display:none;
+margin-top:15px;
+padding:15px;
+background:#f9fbff;
+border-left:5px solid #2196F3;
+text-align:left;
+border-radius:10px;
+}
+.close{
+float:right;
+cursor:pointer;
+color:red;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🎮 Kuis Matematika</h1>
+<h3>Strategi Belanja Hemat Berdasarkan Perhitungan Aritmetika Sosial</h3>
+
+<div class="timer" id="timer">Waktu: 60:00</div>
+
+<div class="score-board">
+<div id="team1" class="team active"></div>
+<div id="team2" class="team"></div>
+<div id="team3" class="team"></div>
+<div id="team4" class="team"></div>
+</div>
+
+<div id="questionNumber"></div>
+<div class="question" id="question"></div>
+<div class="options" id="options"></div>
+
+<button onclick="nextQuestion()">Soal Berikut</button>
+<button onclick="switchTeam()">Ganti Regu</button>
+<button onclick="showPembahasan()">📘 Pembahasan</button>
+
+<div id="feedback" class="feedback"></div>
+
+<div id="pembahasan" class="pembahasan">
+<span class="close" onclick="closePembahasan()">✖</span>
+<b>Pembahasan</b>
+<div id="pembahasanText"></div>
+</div>
+</div>
+
+<script>
+let questions=[
+{
+q:"Kamu memiliki anggaran Rp500.000 untuk membeli perlengkapan sekolah. Toko A memberikan diskon 20%, sedangkan Toko B memberikan diskon 10% dan cashback Rp30.000. Barang yang ingin dibeli seharga Rp500.000. Pilihan mana yang lebih hemat?\n",
+options:["Toko A","Toko B","Keduanya sama hemat","Tidak cukup informasi"],
+correct:"Toko A",
+p:"Toko A memberikan diskon 20% × Rp500.000 = Rp100.000 sehingga harga akhir Rp400.000. Toko B memberikan diskon 10% × Rp500.000 = Rp50.000 sehingga harga menjadi Rp450.000, lalu mendapat cashback Rp30.000 sehingga harga efektif Rp420.000. Karena Rp400.000 lebih murah daripada Rp420.000, Toko A lebih hemat. Kunci jawaban pada soal sebelumnya tidak sesuai dan telah diperbaiki.",
+img:""
+},
+{
+q:"Sebuah toko menawarkan diskon 15% dan PPN 10% untuk barang seharga Rp600.000. Berapa harga akhir yang harus dibayar?\n",
+options:["Rp510.000","Rp561.000","Rp600.000","Rp585.000"],
+correct:"Rp561.000",
+p:"Diskon 15% dari Rp600.000 adalah Rp90.000 sehingga harga setelah diskon Rp510.000. PPN 10% dari Rp510.000 adalah Rp51.000. Harga akhir yang harus dibayar adalah Rp510.000 + Rp51.000 = Rp561.000.",
+img:""
+},
+{
+q:"Kamu ingin membeli 2 jaket masing-masing seharga Rp250.000. Toko A memberikan diskon 10% untuk pembelian kedua, sedangkan Toko B memberikan diskon 5% untuk semua barang. Mana yang lebih hemat?\n",
+options:["Toko A","Toko B","Keduanya sama hemat","Tidak cukup informasi"],
+correct:"Keduanya sama hemat",
+p:"Toko A: jaket pertama Rp250.000 dan jaket kedua mendapat diskon 10% menjadi Rp225.000, sehingga total Rp475.000. Toko B: diskon 5% dari total Rp500.000 adalah Rp25.000 sehingga total juga Rp475.000. Kedua toko memberikan biaya akhir yang sama. Kunci jawaban pada soal sebelumnya diperbaiki.",
+img:""
+},
+{
+q:"Dengan anggaran Rp1.000.000, kamu ingin membeli barang-barang berikut: Sepatu Rp400.000, Tas Rp300.000, Jaket Rp350.000. Toko memberikan diskon 20% untuk semua barang. Apakah anggaranmu cukup?\n",
+options:["Ya, cukup","Tidak cukup","Hanya cukup untuk dua barang","Perlu tambahan Rp50.000"],
+correct:"Ya, cukup",
+p:"Total harga awal adalah Rp400.000 + Rp300.000 + Rp350.000 = Rp1.050.000. Diskon 20% dari Rp1.050.000 adalah Rp210.000 sehingga harga akhir Rp840.000. Karena Rp840.000 masih di bawah anggaran Rp1.000.000, anggaran tersebut cukup.",
+img:""
+},
+{
+q:"Promo: Beli 2 gratis 1 untuk barang seharga Rp150.000. Jika kamu membeli 3 barang, berapa harga rata-rata per barang yang kamu bayar?\n",
+options:["Rp150.000","Rp100.000","Rp75.000","Rp50.000"],
+correct:"Rp100.000",
+p:"Dengan promo beli 2 gratis 1, pembeli hanya membayar 2 barang, yaitu 2 × Rp150.000 = Rp300.000. Jumlah barang yang diterima 3 buah. Harga rata-rata per barang adalah Rp300.000 ÷ 3 = Rp100.000.",
+img:""
+}
+
+];
+
+let currentQuestion=0;
+let scores=[0,0,0,0];
+let wrongs=[0,0,0,0];
+let currentTeam=0;
+let answered=new Array(questions.length).fill(false);
+let quizFinished=false;
+
+function shuffle(arr){
+for(let i=arr.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[arr[i],arr[j]]=[arr[j],arr[i]];
+}}
+
+function showQuestion(){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+let opsi=[...q.options];
+shuffle(opsi);
+
+q.correctIndex=opsi.indexOf(q.correct);
+q.correctLetter=String.fromCharCode(65+q.correctIndex);
+
+document.getElementById("question").textContent=q.q;
+document.getElementById("questionNumber").textContent=
+`Soal ${currentQuestion+1} dari ${questions.length}`;
+
+let html="";
+opsi.forEach((o,i)=>{
+let letter=String.fromCharCode(65+i);
+let btnClass=["btnA","btnB","btnC","btnD"][i];
+html+=`<button class="optionBtn ${btnClass}"
+onclick="checkAnswer('${letter}','${o}',this)">
+${letter}. ${o}</button>`;
+});
+document.getElementById("options").innerHTML=html;
+document.getElementById("feedback").textContent="";
+closePembahasan();
+}
+
+function checkAnswer(letter,text,btn){
+if(quizFinished) return;
+
+let q=questions[currentQuestion];
+document.querySelectorAll(".optionBtn").forEach(b=>b.disabled=true);
+
+if(text===q.correct){
+btn.classList.add("correct");
+scores[currentTeam]++;
+answered[currentQuestion]=true;
+document.getElementById("feedback").textContent="✅ Benar";
+}else{
+btn.classList.add("wrong");
+wrongs[currentTeam]++;
+document.getElementById("feedback").textContent="❌ Salah";
+}
+
+updateScore();
+
+setTimeout(()=>{
+if(answered.every(v=>v)){
+endQuiz();
+}else nextQuestion();
+},800);
+}
+
+function nextQuestion(){
+let start=currentQuestion;
+do{
+currentQuestion=(currentQuestion+1)%questions.length;
+}while(answered[currentQuestion] && currentQuestion!==start);
+showQuestion();
+}
+
+function endQuiz(){
+quizFinished=true;
+clearInterval(timer);
+document.getElementById("question").innerHTML="🏁 <b>KUIS SELESAI</b>";
+document.getElementById("options").innerHTML="";
+document.getElementById("feedback").innerHTML=showWinners();
+}
+
+function showWinners(){
+let rank=[0,1,2,3].map(i=>({
+team:i+1,
+score:scores[i]-wrongs[i]
+}));
+rank.sort((a,b)=>b.score-a.score);
+
+let html="<h2>🏆 Pengumuman Juara</h2>";
+rank.forEach((r,i)=>{
+html+=`<p>Juara ${i+1}: <b>Regu ${r.team}</b> (Skor ${r.score})</p>`;
+});
+return html;
+}
+
+function updateScore(){
+for(let i=0;i<4;i++){
+document.getElementById("team"+(i+1)).textContent=
+`Regu ${i+1} | Benar: ${scores[i]} | Salah: ${wrongs[i]} | Skor: ${scores[i]-wrongs[i]}`;
+}}
+
+function switchTeam(){
+document.getElementById("team"+(currentTeam+1)).classList.remove("active");
+currentTeam=(currentTeam+1)%4;
+document.getElementById("team"+(currentTeam+1)).classList.add("active");
+}
+
+function showPembahasan(){
+document.getElementById("pembahasanText").textContent=
+questions[currentQuestion].p;
+document.getElementById("pembahasan").style.display="block";
+}
+
+function closePembahasan(){
+document.getElementById("pembahasan").style.display="none";
+}
+
+let timeLeft=3600;
+let timer=setInterval(()=>{
+let m=Math.floor(timeLeft/60);
+let s=timeLeft%60;
+if(s<10)s="0"+s;
+document.getElementById("timer").textContent=`Waktu: ${m}:${s}`;
+timeLeft--;
+if(timeLeft<0){
+document.getElementById("timer").textContent="⏰ Waktu Habis";
+endQuiz();
+}},1000);
+
+shuffle(questions);
+updateScore();
+showQuestion();
+</script>
+
+<h3>Dian Wiguna</h3>
+</body>
+</html>
